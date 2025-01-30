@@ -1,19 +1,42 @@
 import React from 'react'
-import {Form ,Input} from "antd";
+// import {Form ,Input} from "antd";
 import "../styles/loginstyle.css"
 // import Link from 'antd/es/typography/Link';
 import {Link} from 'react-router-dom'
-import register from './Registerpage';
+import {Form ,Input , message} from "antd";
+import { useNavigate } from 'react-router-dom';
+import axios from 'axios';
+// import register from './Registerpage';
 
 const Loginpage = () => {
-    const onFinishHaandler = (values) => {
-        console.log(values);
+
+    const navigate = useNavigate();
+
+    const onFinishHandler = async (values) => {
+        try{
+            const res = await axios.post("http://localhost:8080/api/v1/user/login", values);
+            if(res.data.success){
+                //generate token and save ifo in local storage
+                localStorage.setItem("token" , res.data.token)
+
+
+                message.success('Login Successfull');
+                // navigate to the homepage
+                navigate('/');
+            }
+            else{
+                message.error(res.data.message);
+            }
+        }catch(error){
+            console.log(error);
+            message.error('Something went wrong');
+        }
     }
 
   return (
     <>
         <div className='form-container'>
-            <Form className='login-form' layout='vertical' onFinish={onFinishHaandler}>
+            <Form className='login-form' layout='vertical' onFinish={onFinishHandler}>
                 <h3 className='text-center'>Login Form</h3>
                 
 
