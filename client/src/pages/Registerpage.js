@@ -7,12 +7,18 @@ import { useNavigate } from 'react-router-dom';
 import {Link} from 'react-router-dom'
 // import login from './Loginpage';
 
+import {useDispatch} from 'react-redux';
+import { showLoading , hideLoading } from '../redux/features/alertSlice';
+
 const Registerpage = () => {
     const navigate = useNavigate();
+    const dispatch = useDispatch();
 
     const onFinishHandler = async (values) => {
         try{
+            dispatch(showLoading());
             const res = await axios.post("http://localhost:8080/api/v1/user/register", values);
+            dispatch(hideLoading());
             if(res.data.success){
                 message.success('Registration Successfull');
                 navigate('/login');
@@ -21,6 +27,7 @@ const Registerpage = () => {
                 message.error(res.data.message);
             }
         }catch(error){
+            dispatch(hideLoading());
             console.log(error);
             message.error('Something went wrong');
         }

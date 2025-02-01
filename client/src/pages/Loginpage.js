@@ -8,13 +8,25 @@ import { useNavigate } from 'react-router-dom';
 import axios from 'axios';
 // import register from './Registerpage';
 
+import {useDispatch} from 'react-redux';
+import { showLoading , hideLoading } from '../redux/features/alertSlice';
+// import { Dispatch } from './../../node_modules/redux/src/types/store';
+
+
 const Loginpage = () => {
 
     const navigate = useNavigate();
+    const dispatch = useDispatch();
 
     const onFinishHandler = async (values) => {
         try{
+
+            dispatch(showLoading());
+
+
             const res = await axios.post("http://localhost:8080/api/v1/user/login", values);
+
+            dispatch(hideLoading());
             if(res.data.success){
                 //generate token and save ifo in local storage
                 localStorage.setItem("token" , res.data.token)
@@ -28,6 +40,7 @@ const Loginpage = () => {
                 message.error(res.data.message);
             }
         }catch(error){
+            dispatch(hideLoading());
             console.log(error);
             message.error('Something went wrong');
         }
