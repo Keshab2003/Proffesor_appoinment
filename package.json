@@ -1,6 +1,7 @@
 {
   "dependencies": {
     "@ant-design/v5-patch-for-react-19": "^1.0.3",
-    "jsonwebtoken": "^9.0.2"
+    "jsonwebtoken": "^9.0.2",
+    "react-scripts": "^5.0.1"
   }
 }

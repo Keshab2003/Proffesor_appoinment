@@ -1,6 +1,6 @@
 import React from 'react';
 import ReactDOM from 'react-dom/client';
-import "antd/dist/reset.css";
+// import "antd/dist/reset.css";
 import './index.css';
 import App from './App';
 import '@ant-design/v5-patch-for-react-19'; // Import the compatibility package

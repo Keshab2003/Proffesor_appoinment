@@ -1,47 +1,69 @@
+import React from 'react';
+import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
+import Login from './components/auth/Login';
+import Register from './components/auth/Register';
+import StudentDashboard from './components/dashboard/StudentDashboard';
+import ProfessorDashboard from './components/dashboard/ProfessorDashboard';
 
-import './App.css';
-import {BrowserRouter , Routes , Route} from 'react-router-dom';
-import Homepage from "./pages/Homepage";
-import Registerpage from "./pages/Registerpage";
-import Loginpage from "./pages/Loginpage";
-import { useSelector } from 'react-redux';
-import Spinner from './components/Spinner';
-import ProtectedRoute from './components/ProtectedRoute';
-import PublicRoute from './components/PublicRoute';
+// Protected Route component
+const ProtectedRoute = ({ children, role }) => {
+    const user = JSON.parse(localStorage.getItem('user'));
+    if (!user) {
+        return <Navigate to="/login" />;
+    }
+    if (role && user.role !== role) {
+        return <Navigate to="/" />;
+    }
+    return children;
+};
 
 function App() {
-
-  const {loading} = useSelector(state => state.alerts);
-
-  return (
-    <>
-      <BrowserRouter>
-      {loading ? (<Spinner/>) :
-       ( <Routes>
-          <Route path="/" element={
-            <ProtectedRoute>
-              <Homepage/>
-            </ProtectedRoute>            
-            }
-          />
-          <Route path="/register" element={
-            <PublicRoute>
-              <Registerpage/>
-            </PublicRoute>
-            }
-          />
-          <Route path="/login" element={
-            <PublicRoute>
-              <Loginpage/>
-            </PublicRoute>
-          }/>
-        </Routes>)
-      }
-        
-      </BrowserRouter>
-        
-    </>
-  );
+    return (
+        <Router>
+            <div className="min-h-screen bg-gray-900 text-white">
+                <Routes>
+                    <Route path="/login" element={<Login />} />
+                    <Route path="/register" element={<Register />} />
+                    
+                    {/* Student Routes */}
+                    <Route
+                        path="/student/dashboard"
+                        element={
+                            <ProtectedRoute role="student">
+                                <StudentDashboard />
+                            </ProtectedRoute>
+                        }
+                    />
+                    
+                    {/* Professor Routes */}
+                    <Route
+                        path="/professor/dashboard"
+                        element={
+                            <ProtectedRoute role="professor">
+                                <ProfessorDashboard />
+                            </ProtectedRoute>
+                        }
+                    />
+                    
+                    {/* Default Route */}
+                    <Route
+                        path="/"
+                        element={
+                            <Navigate
+                                to={
+                                    localStorage.getItem('user')
+                                        ? JSON.parse(localStorage.getItem('user')).role === 'professor'
+                                            ? '/professor/dashboard'
+                                            : '/student/dashboard'
+                                        : '/login'
+                                }
+                            />
+                        }
+                    />
+                </Routes>
+            </div>
+        </Router>
+    );
 }
 
 export default App;

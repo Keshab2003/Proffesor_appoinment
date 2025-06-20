@@ -1,66 +1,66 @@
-// import { express } from 'express';
 const express = require('express');
-// import colors from 'colors';
 const colors = require('colors');
-// import dotenv from 'dotenv';
-const dotenv = require('dotenv');
-// import morgan from 'morgan';
 const morgan = require('morgan');
-const connectDB = require('./config/db');
 const cors = require('cors');
+const connectDB = require('./config/db');
+const config = require('./config/config');
+const authRoutes = require('./routes/authRoutes');
+const appointmentRoutes = require('./routes/appointmentRoutes');
+const professorRoutes = require('./routes/professorRoutes');
+const courseRoutes = require('./routes/courseRoutes');
 
-// dotenv.config({ path: './config/config.env' });
-dotenv.config();
-
-//mongoDB connection
-connectDB();
-
-
-
-
+// Initialize Express app
 const app = express();
-//middleware
-app.use(cors());
+
+// Middleware
+app.use(cors({
+    origin: 'http://localhost:3000',
+    credentials: true,
+    methods: ['GET', 'POST', 'PUT', 'DELETE', 'PATCH', 'OPTIONS'],
+    allowedHeaders: ['Content-Type', 'Authorization']
+}));
 
 app.use(express.json());
 app.use(morgan('dev'));
 
-app.use(cors({
-    origin: 'http://localhost:3000', // Replace with your frontend's origin
-    methods: 'GET,HEAD,PUT,PATCH,POST,DELETE',
-    credentials: true,
-}));
+// Connect to Database
+connectDB();
 
+// API Routes
+app.use('/api/auth', authRoutes);
+app.use('/api/appointments', appointmentRoutes);
+app.use('/api/professors', professorRoutes);
+app.use('/api/courses', courseRoutes);
 
-
-// Manually set CORS headers
-app.use((req, res, next) => {
-    res.header('Access-Control-Allow-Origin', 'http://localhost:3000');
-    res.header('Access-Control-Allow-Methods', 'GET,HEAD,PUT,PATCH,POST,DELETE');
-    res.header('Access-Control-Allow-Headers', 'Origin, X-Requested-With, Content-Type, Accept, Authorization');
-    next();
+// Root Route for testing
+app.get('/', (req, res) => {
+    res.json({ 
+        success: true,
+        message: 'Professor Appointment API is running...',
+        environment: config.nodeEnv,
+        port: config.port
+    });
 });
 
+// Error Handling Middleware
+app.use((err, req, res, next) => {
+    console.error(err.stack);
+    res.status(500).json({ 
+        success: false, 
+        message: err.message || 'An internal server error occurred.' 
+    });
+});
 
-//routes
-app.use("/api/v1/user", require("./routes/userRoutes"));
+// Start Server
+const server = app.listen(config.port, () => {
+    console.log(`Server is running in ${config.nodeEnv} mode on port ${config.port}`.yellow.bold);
+});
 
-// app.get('/', (req, res) => {
-//     res.status(200).send({
-//         success: true,
-//         message: "Server is running",
-//     });
-// });
-
-//test purpose
-
-
-//port
-const PORT = process.env.PORT || 8080;
-
-//listen port 
-app.listen(PORT, () => {
-    console.log(`Server is running on port ${PORT}`.yellow.bold);
+// Handle unhandled promise rejections
+process.on('unhandledRejection', (err) => {
+    console.error('Unhandled Promise Rejection:'.red.bold, err);
+    // Close server & exit process
+    server.close(() => process.exit(1));
 });
 
 
